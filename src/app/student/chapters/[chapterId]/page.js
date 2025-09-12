@@ -49,8 +49,10 @@ export default function ChapterQuizPage() {
     <main className="min-h-screen flex items-start justify-center p-8 bg-gray-900 text-white">
       <div className="w-full max-w-3xl">
         <h2 className="text-2xl font-bold mb-4">
-          {slug ? slug.toUpperCase() : ""} — Chapter {chapterId || ""}
-        </h2>
+  {slug && typeof slug === "string" ? slug.toUpperCase() : ""} — Chapter{" "}
+  {chapterId || ""}
+</h2>
+
 
         {!started ? (
           <div className="space-y-4">
