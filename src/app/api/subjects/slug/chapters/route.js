@@ -1,5 +1,5 @@
 // src/app/api/subjects/[slug]/chapters/route.js
-import dbConnect from "@/lib/dbconnect";
+import dbConnect from "@/lib/dbConnect";
 import Subject from "@/models/Subject";
 import Chapter from "@/models/Chapter";
 

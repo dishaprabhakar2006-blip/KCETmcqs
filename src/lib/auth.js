@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import dbConnect from "@/lib/dbconnect";
+import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 
 export async function getUserFromToken(token) {

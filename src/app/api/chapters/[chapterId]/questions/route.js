@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import dbConnect from "@/lib/dbconnect"; // Ensure this path is correct for your project
+import dbConnect from "@/lib/dbConnect"; // Ensure this path is correct for your project
 import Question from "@/models/Question";
 
 export async function GET(request, { params }) {
