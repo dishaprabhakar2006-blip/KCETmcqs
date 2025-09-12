@@ -2,11 +2,14 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
+// ✅ Force runtime rendering (no prerender build errors)
+export const dynamic = "force-dynamic";
+
 function getStudentId() {
   // If user is logged-in, use their id; else use a persistent guest id in localStorage
   let id = localStorage.getItem("studentId");
   if (!id) {
-    id = "guest-" + Math.random().toString(36).slice(2,9);
+    id = "guest-" + Math.random().toString(36).slice(2, 9);
     localStorage.setItem("studentId", id);
   }
   return id;
@@ -23,7 +26,9 @@ export default function ChapterQuizPage() {
     setLoading(true);
     try {
       // fetch random 10 questions for chosen level
-      const res = await fetch(`/api/questions?subject=${slug}&chapter=${chapterId}&level=${level}&random=1&limit=10`);
+      const res = await fetch(
+        `/api/questions?subject=${slug}&chapter=${chapterId}&level=${level}&random=1&limit=10`
+      );
       const data = await res.json();
       if (data.ok) setQuestions(data.questions);
       else alert("Failed to load questions");
@@ -43,13 +48,19 @@ export default function ChapterQuizPage() {
   return (
     <main className="min-h-screen flex items-start justify-center p-8 bg-gray-900 text-white">
       <div className="w-full max-w-3xl">
-        <h2 className="text-2xl font-bold mb-4">{slug.toUpperCase()} — Chapter {chapterId}</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {slug ? slug.toUpperCase() : ""} — Chapter {chapterId || ""}
+        </h2>
 
         {!started ? (
           <div className="space-y-4">
             <label>
               Difficulty:
-              <select value={level} onChange={e => setLevel(e.target.value)} className="ml-2 text-black p-1">
+              <select
+                value={level}
+                onChange={(e) => setLevel(e.target.value)}
+                className="ml-2 text-black p-1"
+              >
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
@@ -58,15 +69,33 @@ export default function ChapterQuizPage() {
             </label>
 
             <div className="flex gap-3">
-              <button onClick={startQuiz} className="bg-green-600 px-4 py-2 rounded">Start Quiz</button>
-              <button onClick={loadQuestions} className="bg-gray-700 px-4 py-2 rounded">Load Preview</button>
+              <button
+                onClick={startQuiz}
+                className="bg-green-600 px-4 py-2 rounded"
+              >
+                Start Quiz
+              </button>
+              <button
+                onClick={loadQuestions}
+                className="bg-gray-700 px-4 py-2 rounded"
+              >
+                Load Preview
+              </button>
               {loading && <span>Loading...</span>}
             </div>
 
-            <p className="text-sm text-gray-300 mt-4">Note: You will be given 10 randomized questions from this chapter/level.</p>
+            <p className="text-sm text-gray-300 mt-4">
+              Note: You will be given 10 randomized questions from this
+              chapter/level.
+            </p>
           </div>
         ) : (
-          <QuizRunner questions={questions} chapter={chapterId} subject={slug} level={level} />
+          <QuizRunner
+            questions={questions}
+            chapter={chapterId}
+            subject={slug}
+            level={level}
+          />
         )}
       </div>
     </main>
@@ -82,7 +111,10 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
 
   useEffect(() => {
     // reset on new questions
-    setIdx(0); setSelected(null); setScore(0); setAnswers([]);
+    setIdx(0);
+    setSelected(null);
+    setScore(0);
+    setAnswers([]);
   }, [questions]);
 
   if (!questions || questions.length === 0) {
@@ -97,15 +129,18 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
 
   const next = () => {
     const correctIndex = q.correctAnswerIndex;
-    const isCorrect = (selected === correctIndex);
-    if (isCorrect) setScore(s => s + 1);
+    const isCorrect = selected === correctIndex;
+    if (isCorrect) setScore((s) => s + 1);
 
-    setAnswers(a => [...a, {
-      questionId: q._id || q.id,
-      selectedIndex: selected,
-      correctIndex,
-      correct: isCorrect
-    }]);
+    setAnswers((a) => [
+      ...a,
+      {
+        questionId: q._id || q.id,
+        selectedIndex: selected,
+        correctIndex,
+        correct: isCorrect,
+      },
+    ]);
 
     setSelected(null);
     if (idx + 1 < questions.length) {
@@ -127,12 +162,11 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
       chapterId: Number(chapter),
       level,
       totalQuestions: questions.length,
-      correctCount: score + (selected === q.correctAnswerIndex ? 1 : 0) * 0, // note: score already tallied properly
       details: answers,
     };
 
     // compute correctCount reliably
-    payload.correctCount = answers.filter(a => a.correct).length;
+    payload.correctCount = answers.filter((a) => a.correct).length;
 
     try {
       const res = await fetch("/api/attempts", {
@@ -151,7 +185,9 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
     }
 
     // show final UI
-    alert(`Quiz finished! Score ${payload.correctCount}/${payload.totalQuestions}`);
+    alert(
+      `Quiz finished! Score ${payload.correctCount}/${payload.totalQuestions}`
+    );
     // reload page or show results - here we reload to go back to start
     window.location.reload();
   };
@@ -159,7 +195,9 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
   return (
     <div className="bg-gray-800 p-6 rounded space-y-4">
       <div>
-        <div className="text-sm text-gray-300 mb-1">Q {idx + 1} / {questions.length}</div>
+        <div className="text-sm text-gray-300 mb-1">
+          Q {idx + 1} / {questions.length}
+        </div>
         <div className="text-lg font-semibold mb-2">{q.text}</div>
         <div className="grid gap-3">
           {q.options.map((opt, i) => (
@@ -178,9 +216,13 @@ function QuizRunner({ questions = [], chapter, subject, level }) {
       </div>
 
       <div className="flex justify-between">
-        <div>Current score: {answers.filter(a => a.correct).length}</div>
+        <div>Current score: {answers.filter((a) => a.correct).length}</div>
         <div>
-          <button onClick={next} disabled={selected === null} className="bg-green-500 px-4 py-1 rounded">
+          <button
+            onClick={next}
+            disabled={selected === null}
+            className="bg-green-500 px-4 py-1 rounded"
+          >
             {idx + 1 === questions.length ? "Finish" : "Next"}
           </button>
         </div>
