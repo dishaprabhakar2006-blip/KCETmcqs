@@ -3,9 +3,7 @@
 Live Website:
 https://kce-tmcqs.vercel.app
 
-Demo Video:
-
-[MCQS Demo](kcetdemo.mp4)
+Demo Video:[MCQS Demo](kcetdemo.mp4)
 
 
 Tech Stack:
