@@ -3,6 +3,9 @@
 Live Website:
 https://kce-tmcqs.vercel.app
 
+Demo Video:
+
+[Watch the Demo Here](kcetdemo.mp4)
 Tech Stack:
 - Next.js 16
 - MongoDB Atlas
