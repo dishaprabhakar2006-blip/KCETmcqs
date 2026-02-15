@@ -6,6 +6,15 @@ https://kce-tmcqs.vercel.app
 Demo Video:[MCQS Demo](kcetdemo.mp4)
 
 
+Screen Shots
+![Demo Screenshot](ks1.png)
+![Demo Screenshot](ks2.png)
+![Demo Screenshot](ks3.png)
+
+
+
+
+
 Tech Stack:
 - Next.js 16
 - MongoDB Atlas
