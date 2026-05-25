@@ -2,12 +2,6 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error("❌ Please define MONGODB_URI in .env.local");
-}
-
 let cached = global.mongoose;
 
 if (!cached) {
@@ -15,6 +9,12 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI) {
+    throw new Error("❌ Please define MONGODB_URI in .env.local");
+  }
+
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
@@ -25,3 +25,4 @@ async function dbConnect() {
 }
 
 export default dbConnect;
+

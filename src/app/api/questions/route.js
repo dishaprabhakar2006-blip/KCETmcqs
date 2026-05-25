@@ -4,8 +4,6 @@ import Question from "@/models/Question";
 
 export async function GET(request) {
   try {
-    await dbConnect();
-
     const { searchParams } = new URL(request.url);
     const subject = searchParams.get("subject");
     const chapter = searchParams.get("chapter");
@@ -15,13 +13,30 @@ export async function GET(request) {
     console.log("Chapter:", chapter);
     console.log("Level:", level);
 
-    const questions = await Question.find({
-      subject,
-      chapter,
-      level,
-    });
+    if (!subject || !chapter || !level) {
+      return NextResponse.json(
+        { error: "Missing required parameters" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(questions);
+    try {
+      await dbConnect();
+      const questions = await Question.find({
+        subject,
+        chapter,
+        level,
+      });
+      return NextResponse.json(questions);
+
+    } catch (dbError) {
+      console.warn("⚠️ MongoDB connection failed. Falling back to local offline text files...", dbError.message);
+      
+      const { getOfflineQuestions } = await import('@/lib/offlineDb');
+      const questions = getOfflineQuestions(subject, chapter, level);
+      
+      return NextResponse.json(questions);
+    }
 
   } catch (error) {
     console.error("Questions API Error:", error);
@@ -31,3 +46,4 @@ export async function GET(request) {
     );
   }
 }
+

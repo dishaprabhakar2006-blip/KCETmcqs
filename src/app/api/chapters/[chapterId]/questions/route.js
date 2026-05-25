@@ -7,9 +7,6 @@ export async function GET(request, context) {
 
   try {
     const { chapterId } = await context.params;
-
-    await dbConnect();
-
     const decodedChapter = decodeURIComponent(chapterId);
     console.log(`[API LOG] Decoded Chapter from URL: "${decodedChapter}"`);
 
@@ -24,14 +21,36 @@ export async function GET(request, context) {
       );
     }
 
-    const questions = await Question.find({
-      chapter: decodedChapter,
-      level: difficulty,
-    });
+    try {
+      await dbConnect();
+      const questions = await Question.find({
+        chapter: decodedChapter,
+        level: difficulty,
+      });
 
-    console.log(`[API LOG] Found ${questions.length} questions`);
+      console.log(`[API LOG] Found ${questions.length} questions via MongoDB`);
+      return NextResponse.json(questions);
 
-    return NextResponse.json(questions);
+    } catch (dbError) {
+      console.warn("⚠️ MongoDB fetch failed. Falling back to local offline text files...", dbError.message);
+      
+      const { getOfflineQuestions } = await import('@/lib/offlineDb');
+      
+      // Since subject is not in the URL, search across all 4 subjects to find the matching chapter
+      const subjects = ['Physics', 'Chemistry', 'Maths', 'Biology'];
+      let questions = [];
+      
+      for (const subject of subjects) {
+        const found = getOfflineQuestions(subject, decodedChapter, difficulty);
+        if (found && found.length > 0) {
+          questions = found;
+          console.log(`[API LOG] Found ${questions.length} questions in offline file for subject: ${subject}`);
+          break;
+        }
+      }
+      
+      return NextResponse.json(questions);
+    }
 
   } catch (err) {
     console.error("❌ API ERROR:", err);
@@ -41,3 +60,4 @@ export async function GET(request, context) {
     );
   }
 }
+
